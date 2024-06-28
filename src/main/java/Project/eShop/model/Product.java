@@ -26,7 +26,7 @@ public class Product {
     private Double price;
     // private Order order;
 
-    @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
     @JsonIgnoreProperties("products")
     private Set<Order> orders = new HashSet<>();
 
