@@ -14,8 +14,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -44,14 +46,20 @@ public class ProductServiceImpl implements ProductService {
         ProductResponse productResponse = new ProductResponse();
         Product savedProduct = productConverter.toProduct(productRequest);
         productRepository.save(savedProduct);
-        savedProduct.setOrder(order.get());
+
+        Order savedOrder = orderRepository.getReferenceById(order.get().getId());
+        Set<Order> orders = new HashSet<>();
+        orders.add(savedOrder);
+        savedProduct.setOrders(orders);
+        //savedProduct.setOrder(order.get());
+
         BeanUtils.copyProperties(savedProduct, productResponse);
         return productResponse;
     }
 
     @Override
     public List<Product> getAllProducts() {
-        return productRepository.getAll();
+        return productRepository.findAll();
     }
 
     @Override
@@ -72,7 +80,11 @@ public class ProductServiceImpl implements ProductService {
         if (currentOrder == null) {
             throw new RecordNotFoundException("Order id not exist!");
         }
-        product.setOrder(currentOrder);
+        Set<Order> orders = new HashSet<>();
+        orders.add(currentOrder);
+        product.setOrders(orders);
+        //product.setOrder(currentOrder);
+
         product.setPrice(productRequest.getPrice());
         product.setName(productRequest.getName());
 
