@@ -39,10 +39,10 @@ public class Customer {
     //private String address;
 
     @OneToMany(mappedBy = "customer",
-            cascade = CascadeType.REMOVE,
-            fetch = FetchType.EAGER)
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
     @JsonManagedReference
-    private Set<Order> addresses;
+    private Set<Address> addresses;
 
     @OneToMany(mappedBy = "customer",
             cascade = CascadeType.ALL,
