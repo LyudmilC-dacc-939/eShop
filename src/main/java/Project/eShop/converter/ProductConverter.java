@@ -7,7 +7,8 @@ import Project.eShop.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class ProductConverter {
@@ -19,8 +20,10 @@ public class ProductConverter {
         Product product = new Product();
         product.setName(productRequest.getName());
         product.setPrice(productRequest.getPrice());
-        Optional<Order> order = orderRepository.findById(product.getId());
-        product.setOrder(order.get());
+        Order order = orderRepository.getReferenceById(productRequest.getOrderId());
+        Set<Order> orders = new HashSet<>();
+        orders.add(order);
+        product.setOrders(orders);
 
         return product;
     }
