@@ -10,8 +10,8 @@ import java.util.Set;
 @Setter
 public class OrderRequest {
 
-    @NotNull(message = "Total amount cannot be null!")
-    private Double totalAmount;
+    //@NotNull(message = "Total amount cannot be null!")
+    //private Double totalAmount;
     @NotNull(message = "CustomerId cannot be null!")
     private Long customerId;
     private Set<Long> productsId;

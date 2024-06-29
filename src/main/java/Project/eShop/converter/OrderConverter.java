@@ -29,18 +29,22 @@ public class OrderConverter {
 
     public Order toOrder(OrderRequest orderRequest) {
         Order order = new Order();
-        order.setTotalAmount(orderRequest.getTotalAmount());
+        //order.setTotalAmount(orderRequest.getTotalAmount());
         Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomerId());
         order.setCustomer(customer.get());
         order.setOrderDate(Instant.now());
+
+        Double priceOfAllProducts = 0.0;
         Set<Product> products = new HashSet<>();
         for (Product product: productRepository.findAll()){
            for (Long productId: orderRequest.getProductsId()){
                if(product.getId().equals(productId)){
                    products.add(product);
                }
+               priceOfAllProducts+=product.getPrice();
            }
         }
+        order.setTotalAmount(priceOfAllProducts);
         order.setProducts(products);
         return order;
     }

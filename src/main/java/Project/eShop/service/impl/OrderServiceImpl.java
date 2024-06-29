@@ -6,8 +6,10 @@ import Project.eShop.dto.OrderRequest;
 import Project.eShop.dto.OrderResponse;
 import Project.eShop.model.Customer;
 import Project.eShop.model.Order;
+import Project.eShop.model.Product;
 import Project.eShop.repository.CustomerRepository;
 import Project.eShop.repository.OrderRepository;
+import Project.eShop.repository.ProductRepository;
 import Project.eShop.service.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +17,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -25,14 +29,17 @@ public class OrderServiceImpl implements OrderService {
     private OrderConverter orderConverter;
     private OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
     public OrderServiceImpl(OrderConverter orderConverter,
                             OrderRepository orderRepository,
-                            CustomerRepository customerRepository) {
+                            CustomerRepository customerRepository,
+                            ProductRepository productRepository) {
         this.orderConverter = orderConverter;
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
+        this.productRepository = productRepository;
     }
 
     @Transactional
@@ -44,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (customer.isEmpty()) {
             throw new RecordNotFoundException("Email not found. Invalid email request.");
-        }else{
+        } else {
             log.info("Going to use existing customer with identifier: " + orderRequest.getCustomerId());
             existingCustomer = customer.get();
         }
@@ -76,8 +83,18 @@ public class OrderServiceImpl implements OrderService {
     public Order updateOrder(OrderRequest orderRequest, Long id) {
         Order existingOrder = orderRepository.findById(id).orElseThrow(() ->
                 new RecordNotFoundException(String.format("Order with id %s not exist", id)));
-        existingOrder.setTotalAmount(orderRequest.getTotalAmount());
-
+        //existingOrder.setTotalAmount(orderRequest.getTotalAmount());
+        Customer customer = customerRepository.getReferenceById(orderRequest.getCustomerId());
+        existingOrder.setCustomer(customer);
+        Set<Product> productsInOrder = existingOrder.getProducts();
+        for (Product product: productRepository.findAll()){
+            for (Long productId: orderRequest.getProductsId()){
+                if(product.getId().equals(productId)){
+                    productsInOrder.add(product);
+                }
+            }
+        }
+        existingOrder.setProducts(productsInOrder);
         return orderRepository.save(existingOrder);
     }
 
